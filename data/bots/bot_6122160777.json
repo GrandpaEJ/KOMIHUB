@@ -1,0 +1,91 @@
+{
+  "bot_username": "bot_6122160777",
+  "bot_name": "KOMIHUB BOT",
+  "owner_id": 6122160777,
+  "created_at": 1761674911.9832342,
+  "commands": {
+    "restart": {
+      "name": "restart",
+      "description": "Restart the entire bot application",
+      "admin_only": true,
+      "disabled": false,
+      "usage": "/restart",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "info": {
+      "name": "info",
+      "description": "Get information about user or chat",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/info [user_id or reply to message]",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "ban": {
+      "name": "ban",
+      "description": "Ban a user from the chat",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/ban [user_id or reply to message] [reason]",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "ping": {
+      "name": "ping",
+      "description": "Check bot response time",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/ping",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "add_command": {
+      "name": "add_command",
+      "description": "Add a new command by uploading a Python file",
+      "admin_only": true,
+      "disabled": false,
+      "usage": "/add_command (reply to a .py file)",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "start": {
+      "name": "start",
+      "description": "Start bot",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/start",
+      "author": "EJ",
+      "version": "0.0.1"
+    },
+    "kick": {
+      "name": "kick",
+      "description": "Kick a user from the chat",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/kick [user_id or reply to message] [reason]",
+      "author": "Komihub",
+      "version": "0.0.1"
+    },
+    "help": {
+      "name": "help",
+      "description": "Get help for commands",
+      "admin_only": false,
+      "disabled": false,
+      "usage": "/help [command_name]",
+      "author": "Komihub",
+      "version": "0.0.2"
+    }
+  },
+  "settings": {
+    "language": "en",
+    "maintenance_mode": false,
+    "auto_backup": true
+  },
+  "features": {
+    "hot_reload": true,
+    "user_tracking": true,
+    "broadcast_system": true,
+    "admin_management": true
+  }
+}

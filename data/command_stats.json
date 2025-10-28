@@ -1,0 +1,36 @@
+{
+  "start": {
+    "total_uses": 2,
+    "unique_users": 2,
+    "last_used": 1761675155.9219995,
+    "users": {
+      "6122160777": 1,
+      "7766886292": 1
+    }
+  },
+  "help": {
+    "total_uses": 3,
+    "unique_users": 2,
+    "last_used": 1761675274.0614152,
+    "users": {
+      "7766886292": 1,
+      "6122160777": 2
+    }
+  },
+  "reload": {
+    "total_uses": 3,
+    "unique_users": 1,
+    "last_used": 1761676007.0068812,
+    "users": {
+      "6122160777": 3
+    }
+  },
+  "restart": {
+    "total_uses": 2,
+    "unique_users": 1,
+    "last_used": 1761675411.525536,
+    "users": {
+      "6122160777": 2
+    }
+  }
+}

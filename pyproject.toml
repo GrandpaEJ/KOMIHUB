@@ -1,0 +1,21 @@
+[project]
+name = "tg-aiogram-1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.22.0",
+    "colorama>=0.4.6",
+    "fastapi>=0.120.1",
+    "passlib[bcrypt]>=1.7.4",
+    "psutil>=7.1.2",
+    "pypng>=0.20220715.0",
+    "pyqrcode>=1.2.1",
+    "python-jose[cryptography]>=3.5.0",
+    "python-multipart>=0.0.20",
+    "requests>=2.32.5",
+    "toml>=0.10.2",
+    "uvicorn>=0.38.0",
+    "yt-dlp>=2025.10.22",
+]
