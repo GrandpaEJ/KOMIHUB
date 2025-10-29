@@ -5,3 +5,12 @@ config.py
 web_api/
 web_api_server.py
 otp_bot_server.py
+
+__pycache__
+*.pyc
+*~
+.venv/
+-e 
+# Build tools and binaries
+tools/
+

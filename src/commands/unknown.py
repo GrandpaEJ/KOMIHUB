@@ -16,6 +16,10 @@ async def handle_unknown_command(message: Message):
             'last_name': message.from_user.last_name
         })
 
+        # Check if it's a command (starts with /)
+        if not message.text or not message.text.startswith('/'):
+            return  # Not a command, ignore
+
         # Extract command name
         command_text = message.text.split()[0].lstrip('/').lower()
 

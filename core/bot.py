@@ -41,6 +41,8 @@ class KomihubBot:
     def register_event(self, event_type, handler):
         if event_type == 'chat_member':
             self.dp.chat_member.register(handler)
+        elif event_type == 'message':
+            self.dp.message.register(handler)
         # Add more event types as needed
 
     async def handle_unknown_command(self, message: Message):

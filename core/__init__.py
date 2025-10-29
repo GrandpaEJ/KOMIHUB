@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher
+from aiogram.types import FSInputFile
 from aiogram.types import Message
 from .logging import logger
 from .lang import get_lang
@@ -17,4 +18,4 @@ def command(cmd_name=None):
     return decorator
 
 # Export commonly used items
-__all__ = ['Bot', 'Dispatcher', 'Message', 'command', 'logger', 'get_lang', 'config']
+__all__ = ['Bot', 'Dispatcher', 'Message', 'command', 'logger', 'get_lang', 'config', 'FSInputFile']

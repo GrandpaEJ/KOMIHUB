@@ -9,26 +9,58 @@
     }
   },
   "help": {
-    "total_uses": 3,
+    "total_uses": 5,
     "unique_users": 2,
-    "last_used": 1761675274.0614152,
+    "last_used": 1761727275.5247693,
     "users": {
       "7766886292": 1,
-      "6122160777": 2
+      "6122160777": 4
     }
   },
   "reload": {
+    "total_uses": 8,
+    "unique_users": 1,
+    "last_used": 1761720478.1206708,
+    "users": {
+      "6122160777": 8
+    }
+  },
+  "restart": {
+    "total_uses": 16,
+    "unique_users": 1,
+    "last_used": 1761728883.9366302,
+    "users": {
+      "6122160777": 16
+    }
+  },
+  "fbc": {
+    "total_uses": 18,
+    "unique_users": 1,
+    "last_used": 1761722664.6789157,
+    "users": {
+      "6122160777": 18
+    }
+  },
+  "yt_music": {
     "total_uses": 3,
     "unique_users": 1,
-    "last_used": 1761676007.0068812,
+    "last_used": 1761728012.800577,
     "users": {
       "6122160777": 3
     }
   },
-  "restart": {
+  "song": {
+    "total_uses": 7,
+    "unique_users": 1,
+    "last_used": 1761728786.196934,
+    "users": {
+      "6122160777": 7
+    }
+  },
+  "unsend": {
     "total_uses": 2,
     "unique_users": 1,
-    "last_used": 1761675411.525536,
+    "last_used": 1761728908.0157335,
     "users": {
       "6122160777": 2
     }

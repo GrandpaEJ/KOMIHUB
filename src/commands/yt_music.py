@@ -5,16 +5,38 @@ import yt_dlp
 import os
 import tempfile
 import config
+import requests
+import asyncio
 
 lang = get_lang()
+
+async def progress_hook(d, progress_msg, message):
+    """Progress hook for yt-dlp downloads"""
+    if d['status'] == 'downloading':
+        try:
+            percent = d.get('_percent_str', '0%').strip()
+            speed = d.get('_speed_str', 'N/A')
+            eta = d.get('_eta_str', 'N/A')
+
+            progress_text = f"🎵 Downloading audio from YouTube...\n⏳ Progress: {percent}\n🚀 Speed: {speed}\n⏰ ETA: {eta}"
+
+            # Update progress message
+            await progress_msg.edit_text(progress_text, parse_mode="HTML")
+        except Exception as e:
+            logger.error(f"Progress update error: {e}")
+    elif d['status'] == 'finished':
+        try:
+            await progress_msg.edit_text("🎵 Download complete! Processing audio...", parse_mode="HTML")
+        except Exception as e:
+            logger.error(f"Progress finish error: {e}")
 
 def help():
     return {
         "name": "yt_music",
-        "version": "0.0.1",
+        "version": "0.0.2",
         "description": "Search and download YouTube music/audio",
         "author": "Komihub",
-        "usage": "/yt_music <search query> - Search for music\n/yt_music <YouTube URL> - Download audio from URL"
+        "usage": "/yt_music search query - Search for music\n/yt_music YouTube URL - Download audio from URL\n/song SongName - Quick search and select from results"
     }
 
 def extract_youtube_id(url: str) -> str:
@@ -36,6 +58,128 @@ def format_duration(seconds: int) -> str:
     seconds = seconds % 60
     return f"{minutes}:{seconds:02d}"
 
+def search_youtube(query: str, api_key: str, max_results: int = 5):
+    """Search YouTube using YouTube Data API v3"""
+    search_url = "https://www.googleapis.com/youtube/v3/search"
+    params = {
+        'part': 'snippet',
+        'q': query,
+        'type': 'video',
+        'maxResults': max_results,
+        'key': api_key,
+        'videoCategoryId': '10'  # Music category
+    }
+
+    try:
+        response = requests.get(search_url, params=params)
+        response.raise_for_status()
+        data = response.json()
+
+        results = []
+        for item in data.get('items', []):
+            video_id = item['id']['videoId']
+            snippet = item['snippet']
+
+            # Get video details for duration
+            details_url = "https://www.googleapis.com/youtube/v3/videos"
+            details_params = {
+                'part': 'contentDetails,statistics',
+                'id': video_id,
+                'key': api_key
+            }
+
+            details_response = requests.get(details_url, params=details_params)
+            details_response.raise_for_status()
+            details_data = details_response.json()
+
+            if details_data.get('items'):
+                video_details = details_data['items'][0]
+                duration = video_details['contentDetails']['duration']
+                view_count = video_details['statistics'].get('viewCount', '0')
+
+                # Parse ISO 8601 duration (PT4M13S -> 4:13)
+                import re
+                duration_match = re.match(r'PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?', duration)
+                if duration_match:
+                    hours = int(duration_match.group(1) or 0)
+                    minutes = int(duration_match.group(2) or 0)
+                    seconds = int(duration_match.group(3) or 0)
+                    total_seconds = hours * 3600 + minutes * 60 + seconds
+                    formatted_duration = format_duration(total_seconds)
+                else:
+                    formatted_duration = "Unknown"
+
+                results.append({
+                    'title': snippet['title'],
+                    'channel': snippet['channelTitle'],
+                    'duration': formatted_duration,
+                    'views': f"{int(view_count):,}",
+                    'url': f"https://youtu.be/{video_id}",
+                    'video_id': video_id
+                })
+
+        return results
+
+    except Exception as e:
+        logger.error(f"YouTube API search error: {e}")
+        return []
+
+@command('song')
+async def song_command(message: Message):
+    """Quick song search and selection command"""
+    logger.info(lang.log_command_executed.format(command='song', user_id=message.from_user.id))
+
+    args = message.text.split(maxsplit=1)
+    if len(args) < 2:
+        await message.answer("❌ Please provide a song name: /song SongName", parse_mode="HTML")
+        return
+
+    query = args[1].strip()
+
+    try:
+        await message.answer(f"🔍 Searching for: <b>{query}</b>", parse_mode="HTML")
+
+        # Use YouTube API for search
+        if not hasattr(config, 'YT_API_KEY') or not config.YT_API_KEY:
+            await message.answer("❌ YouTube API key not configured. Please set YT_API_KEY in config.py")
+            return
+
+        search_results = search_youtube(query, config.YT_API_KEY)
+
+        if not search_results:
+            await message.answer("❌ No results found for your search query.")
+            return
+
+        response = f"🎵 <b>Song Search Results</b>\n\n"
+        response += f"Query: <code>{query}</code>\n\n"
+
+        for i, result in enumerate(search_results, 1):
+            response += f"{i}. <b>{result['title']}</b>\n"
+            response += f"   👤 {result['channel']}\n"
+            response += f"   ⏱️ {result['duration']} | 👁️ {result['views']} views\n\n"
+
+        response += "<i>Reply with 1-5 to download the song</i>"
+
+        # Store search results for reply handling
+        import time
+        search_data = {
+            'user_id': message.from_user.id,
+            'results': search_results,
+            'timestamp': time.time(),
+            'command': 'song'
+        }
+
+        # Store in cache
+        if not hasattr(song_command, 'cache'):
+            song_command.cache = {}
+        song_command.cache[message.from_user.id] = search_data
+
+        await message.answer(response, parse_mode="HTML")
+
+    except Exception as e:
+        logger.error(f"Song search error: {e}")
+        await message.answer("❌ Failed to search for songs. Please try again.")
+
 @command('yt_music')
 async def yt_music_command(message: Message):
     logger.info(lang.log_command_executed.format(command='yt_music', user_id=message.from_user.id))
@@ -45,11 +189,13 @@ async def yt_music_command(message: Message):
         await message.answer(
             "🎵 <b>YouTube Music Search & Download</b>\n\n"
             "Usage:\n"
-            "/yt_music <search query> - Search for music\n"
-            "/yt_music <YouTube URL> - Download audio\n\n"
+            "/yt_music search query - Search for music\n"
+            "/yt_music YouTube URL - Download audio\n"
+            "/song SongName - Quick search and select\n\n"
             "Examples:\n"
             "/yt_music billie eilish bad guy\n"
-            "/yt_music https://youtu.be/dQw4w9WgXcQ",
+            "/yt_music https://youtu.be/dQw4w9WgXcQ\n"
+            "/song despacito",
             parse_mode="HTML"
         )
         return
@@ -60,7 +206,7 @@ async def yt_music_command(message: Message):
     video_id = extract_youtube_id(query)
     if video_id:
         # Handle direct download
-        await message.answer("🎵 Downloading audio from YouTube...", parse_mode="HTML")
+        progress_msg = await message.answer("🎵 Downloading audio from YouTube...\n⏳ Progress: 0%", parse_mode="HTML")
 
         try:
             # yt-dlp options for audio extraction
@@ -74,15 +220,17 @@ async def yt_music_command(message: Message):
                 'outtmpl': os.path.join(tempfile.gettempdir(), '%(title)s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
+                'progress_hooks': [lambda d: progress_hook(d, progress_msg, message)],
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 # Extract info first
                 info = ydl.extract_info(f"https://youtu.be/{video_id}", download=False)
 
-                # Check file size (Telegram limit: 2GB for regular users, 4GB for premium)
-                if info.get('filesize', 0) > 2 * 1024 * 1024 * 1024:  # 2GB
-                    await message.answer("❌ Audio file is too large (>2GB). Telegram limit exceeded.")
+                # Check file size (Telegram limit: 50MB for bots, 2GB for regular users, 4GB for premium)
+                filesize = info.get('filesize', 0)
+                if filesize > 50 * 1024 * 1024:  # 50MB for bots
+                    await message.answer("❌ Audio file is too large (>50MB). Telegram bot limit exceeded.")
                     return
 
                 # Download the audio
@@ -99,6 +247,12 @@ async def yt_music_command(message: Message):
                             break
 
                 if os.path.exists(expected_filename):
+                    # Delete progress message
+                    try:
+                        await progress_msg.delete()
+                    except:
+                        pass
+
                     # Send the audio file
                     with open(expected_filename, 'rb') as audio_file:
                         await message.answer_audio(
@@ -123,44 +277,43 @@ async def yt_music_command(message: Message):
 
     # Handle search
     try:
-        # Simulate YouTube search (in real implementation, would use YouTube API)
-        await message.answer(f"🔍 Searching for: <b>{query}</b>\n\n<i>YouTube search requires API key configuration</i>", parse_mode="HTML")
+        await message.answer(f"🔍 Searching for: <b>{query}</b>", parse_mode="HTML")
 
-        # Mock search results
-        mock_results = [
-            {
-                "title": f"{query} - Official Music Video",
-                "channel": "Artist Channel",
-                "duration": "3:45",
-                "views": "10M",
-                "url": "https://youtu.be/example1"
-            },
-            {
-                "title": f"{query} (Lyrics)",
-                "channel": "Lyrics Channel",
-                "duration": "3:42",
-                "views": "5M",
-                "url": "https://youtu.be/example2"
-            },
-            {
-                "title": f"{query} - Live Performance",
-                "channel": "Live Music",
-                "duration": "4:15",
-                "views": "2M",
-                "url": "https://youtu.be/example3"
-            }
-        ]
+        # Use YouTube API for real search
+        if not hasattr(config, 'YT_API_KEY') or not config.YT_API_KEY:
+            await message.answer("❌ YouTube API key not configured. Please set YT_API_KEY in config.py")
+            return
+
+        search_results = search_youtube(query, config.YT_API_KEY)
+
+        if not search_results:
+            await message.answer("❌ No results found for your search query.")
+            return
 
         response = f"🎵 <b>YouTube Music Search Results</b>\n\n"
         response += f"Query: <code>{query}</code>\n\n"
 
-        for i, result in enumerate(mock_results, 1):
+        for i, result in enumerate(search_results, 1):
             response += f"{i}. <b>{result['title']}</b>\n"
             response += f"   👤 {result['channel']}\n"
             response += f"   ⏱️ {result['duration']} | 👁️ {result['views']} views\n"
             response += f"   🔗 {result['url']}\n\n"
 
-        response += "<i>Use /yt_music <URL> to download audio</i>"
+        response += "<i>Reply with 1-5 to download, or use /yt_music URL</i>"
+
+        # Store search results for reply handling
+        import time
+        search_data = {
+            'user_id': message.from_user.id,
+            'results': search_results,
+            'timestamp': time.time(),
+            'command': 'yt_music'
+        }
+
+        # Store in cache
+        if not hasattr(yt_music_command, 'cache'):
+            yt_music_command.cache = {}
+        yt_music_command.cache[message.from_user.id] = search_data
 
         await message.answer(response, parse_mode="HTML")
 
