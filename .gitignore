@@ -1,10 +1,7 @@
-# Python-generated files
-__pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+-e # Sensitive configuration files
+config.py
 
-# Virtual environments
-.venv
+# Web API files
+web_api/
+web_api_server.py
+otp_bot_server.py
