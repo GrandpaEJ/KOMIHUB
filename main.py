@@ -6,10 +6,11 @@ from core.pid_manager import pid_manager
 from core import logger
 import config
 
+
 def print_banner():
     banner = """
 ╔══════════════════════════════════════╗
-║              KOMIHUB BOT              ║
+║              KOMIHUB BOT             ║
 ║        Telegram Bot Framework        ║
 ╚══════════════════════════════════════╝
 """
@@ -17,6 +18,7 @@ def print_banner():
     print(f"🤖 Bot Name: {config.BOT_NAME}")
     print(f"👤 Admin: {config.ADMIN_NAME}")
     print("=" * 40)
+
 
 async def main():
     print_banner()
@@ -63,6 +65,7 @@ async def main():
     except Exception as e:
         logger.error(f"Critical error during bot polling: {e}")
         raise
+
 
 if __name__ == "__main__":
     asyncio.run(main())

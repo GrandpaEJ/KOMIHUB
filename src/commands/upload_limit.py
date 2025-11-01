@@ -1,7 +1,7 @@
 from core import Message, command, logger, get_lang
-import config
 
 lang = get_lang()
+
 
 def help():
     return {
@@ -9,12 +9,17 @@ def help():
         "version": "0.0.1",
         "description": "Check Telegram upload limits and file size restrictions",
         "author": "Komihub",
-        "usage": "/upload_limit - Show current upload limits"
+        "usage": "/upload_limit - Show current upload limits",
     }
 
-@command('upload_limit')
+
+@command("upload_limit")
 async def upload_limit_command(message: Message):
-    logger.info(lang.log_command_executed.format(command='upload_limit', user_id=message.from_user.id))
+    logger.info(
+        lang.log_command_executed.format(
+            command="upload_limit", user_id=message.from_user.id
+        )
+    )
 
     # Telegram upload limits (as of 2024)
     limits = {
@@ -25,7 +30,7 @@ async def upload_limit_command(message: Message):
         "Sticker": "512 KB",
         "Animation (GIF)": "2 GB",
         "Voice message": "1 MB",
-        "Video note": "2 GB"
+        "Video note": "2 GB",
     }
 
     # Premium benefits
@@ -33,7 +38,7 @@ async def upload_limit_command(message: Message):
         "Upload files up to 4 GB",
         "Download files up to 4 GB",
         "Faster download speeds",
-        "No upload size limits for some file types"
+        "No upload size limits for some file types",
     ]
 
     response = "📤 <b>Telegram Upload Limits</b>\n\n"

@@ -1,8 +1,8 @@
 import os
-import signal
 import psutil
 import time
 from .logging import logger
+
 
 class PIDManager:
     def __init__(self, pid_file: str = "data/bot.pid"):
@@ -18,7 +18,7 @@ class PIDManager:
         if pid is None:
             pid = os.getpid()
         try:
-            with open(self.pid_file, 'w') as f:
+            with open(self.pid_file, "w") as f:
                 f.write(str(pid))
             logger.debug(f"Saved PID {pid} to {self.pid_file}")
         except Exception as e:
@@ -28,7 +28,7 @@ class PIDManager:
         """Get saved PID from file"""
         try:
             if os.path.exists(self.pid_file):
-                with open(self.pid_file, 'r') as f:
+                with open(self.pid_file, "r") as f:
                     return int(f.read().strip())
         except Exception as e:
             logger.error(f"Failed to read PID: {e}")
@@ -88,13 +88,20 @@ class PIDManager:
 
         try:
             # Find all python processes running main.py
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            for proc in psutil.process_iter(["pid", "name", "cmdline"]):
                 try:
-                    if proc.info['name'] == 'python3' or proc.info['name'] == 'python':
-                        cmdline = proc.info['cmdline']
-                        if cmdline and len(cmdline) > 1 and 'main.py' in cmdline[-1] and proc.info['pid'] != current_pid:
-                            logger.info(f"Killing old bot instance: PID {proc.info['pid']}")
-                            self.kill_process(proc.info['pid'])
+                    if proc.info["name"] == "python3" or proc.info["name"] == "python":
+                        cmdline = proc.info["cmdline"]
+                        if (
+                            cmdline
+                            and len(cmdline) > 1
+                            and "main.py" in cmdline[-1]
+                            and proc.info["pid"] != current_pid
+                        ):
+                            logger.info(
+                                f"Killing old bot instance: PID {proc.info['pid']}"
+                            )
+                            self.kill_process(proc.info["pid"])
                             killed_count += 1
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
@@ -102,6 +109,7 @@ class PIDManager:
             logger.error(f"Error during cleanup: {e}")
 
         return killed_count
+
 
 # Global PID manager instance
 pid_manager = PIDManager()

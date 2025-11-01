@@ -1,7 +1,9 @@
 # all strings here are in english language
 
 unknown_command = "Unknown command"
-unknown_error = "An error occurred while processing your request. Please try again later."
+unknown_error = (
+    "An error occurred while processing your request. Please try again later."
+)
 unknown_user = "Unknown user"
 username_not_found = "User not found"
 userid_not_found = "User ID not found"

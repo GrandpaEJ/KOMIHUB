@@ -2,18 +2,22 @@ from core import Message, command, logger, get_lang
 
 lang = get_lang()
 
+
 def help():
     return {
         "name": "unsend",
         "version": "0.0.1",
         "description": "Delete bot messages by replying to them",
         "author": "Komihub",
-        "usage": "/unsend - Reply to any bot message to delete it"
+        "usage": "/unsend - Reply to any bot message to delete it",
     }
 
-@command('unsend')
+
+@command("unsend")
 async def unsend_command(message: Message):
-    logger.info(lang.log_command_executed.format(command='unsend', user_id=message.from_user.id))
+    logger.info(
+        lang.log_command_executed.format(command="unsend", user_id=message.from_user.id)
+    )
 
     # Check if message is a reply
     if not message.reply_to_message:
@@ -21,7 +25,7 @@ async def unsend_command(message: Message):
             "🗑️ <b>Unsend Command</b>\n\n"
             "Reply to any message sent by this bot to delete it.\n\n"
             "<code>/unsend</code> (reply to bot message)",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
         return
 
@@ -41,4 +45,6 @@ async def unsend_command(message: Message):
 
     except Exception as e:
         logger.error(f"Unsend error: {e}")
-        await message.answer("❌ Failed to delete the message. It may be too old or I may not have permission.")
+        await message.answer(
+            "❌ Failed to delete the message. It may be too old or I may not have permission."
+        )

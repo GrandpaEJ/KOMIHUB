@@ -8,6 +8,7 @@ from .database import db
 from .middleware import UserMiddleware
 import config
 
+
 class KomihubBot:
     def __init__(self):
         self.bot = Bot(token=config.BOT_TOKEN)
@@ -23,8 +24,7 @@ class KomihubBot:
 
         # Update bot stats
         db.update_bot_stats(
-            bot_name=config.BOT_NAME,
-            online_since=asyncio.get_event_loop().time()
+            bot_name=config.BOT_NAME, online_since=asyncio.get_event_loop().time()
         )
 
         logger.info(self.lang.log_bot_started)
@@ -39,9 +39,9 @@ class KomihubBot:
             raise
 
     def register_event(self, event_type, handler):
-        if event_type == 'chat_member':
+        if event_type == "chat_member":
             self.dp.chat_member.register(handler)
-        elif event_type == 'message':
+        elif event_type == "message":
             self.dp.message.register(handler)
         # Add more event types as needed
 
@@ -49,10 +49,14 @@ class KomihubBot:
         """Handle unknown commands"""
         try:
             from src.commands.unknown import handle_unknown_command
+
             await handle_unknown_command(message)
         except Exception as e:
             logger.error(f"Error in unknown command handler: {e}")
             # Fallback response
-            await message.answer("❓ Unknown command. Use /help to see available commands.")
+            await message.answer(
+                "❓ Unknown command. Use /help to see available commands."
+            )
+
 
 bot_instance = KomihubBot()

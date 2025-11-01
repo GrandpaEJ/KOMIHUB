@@ -1,7 +1,7 @@
 from core import Message, command, logger, get_lang
-from aiogram.types import ChatMemberAdministrator, ChatMemberOwner
 
 lang = get_lang()
+
 
 def help():
     return {
@@ -9,12 +9,15 @@ def help():
         "version": "0.0.1",
         "description": "Get information about user or chat",
         "author": "Komihub",
-        "usage": "/info [user_id or reply to message]"
+        "usage": "/info [user_id or reply to message]",
     }
 
-@command('info')
+
+@command("info")
 async def info(message: Message):
-    logger.info(lang.log_command_executed.format(command='info', user_id=message.from_user.id))
+    logger.info(
+        lang.log_command_executed.format(command="info", user_id=message.from_user.id)
+    )
 
     # Check if replying to a message
     if message.reply_to_message:
@@ -43,16 +46,16 @@ Language: {user.language_code or 'Unknown'}
 """
 
     # Get chat member status if in group
-    if message.chat.type in ['group', 'supergroup']:
+    if message.chat.type in ["group", "supergroup"]:
         try:
             member = await message.bot.get_chat_member(message.chat.id, user.id)
             status_map = {
-                'creator': 'Owner',
-                'administrator': 'Admin',
-                'member': 'Member',
-                'restricted': 'Restricted',
-                'left': 'Left',
-                'kicked': 'Banned'
+                "creator": "Owner",
+                "administrator": "Admin",
+                "member": "Member",
+                "restricted": "Restricted",
+                "left": "Left",
+                "kicked": "Banned",
             }
             status = status_map.get(member.status, member.status)
             user_info += f"Status: {status}\n"

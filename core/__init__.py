@@ -8,6 +8,7 @@ import config
 # Command decorator
 commands = {}
 
+
 def command(cmd_name=None):
     def decorator(func):
         name = cmd_name or func.__name__
@@ -15,7 +16,18 @@ def command(cmd_name=None):
         # Store command name for later registration
         func._command_name = name
         return func
+
     return decorator
 
+
 # Export commonly used items
-__all__ = ['Bot', 'Dispatcher', 'Message', 'command', 'logger', 'get_lang', 'config', 'FSInputFile']
+__all__ = [
+    "Bot",
+    "Dispatcher",
+    "Message",
+    "command",
+    "logger",
+    "get_lang",
+    "config",
+    "FSInputFile",
+]

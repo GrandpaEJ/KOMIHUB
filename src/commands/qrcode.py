@@ -1,9 +1,9 @@
 from core import Message, command, logger, get_lang
 import pyqrcode
 import io
-import config
 
 lang = get_lang()
+
 
 def help():
     return {
@@ -11,17 +11,22 @@ def help():
         "version": "0.0.1",
         "description": "Generate QR codes from text",
         "author": "Komihub",
-        "usage": "/qrcode <text> - Generate QR code from text"
+        "usage": "/qrcode <text> - Generate QR code from text",
     }
 
-@command('qrcode')
+
+@command("qrcode")
 async def qrcode_command(message: Message):
-    logger.info(lang.log_command_executed.format(command='qrcode', user_id=message.from_user.id))
+    logger.info(
+        lang.log_command_executed.format(command="qrcode", user_id=message.from_user.id)
+    )
 
     # Get text from command arguments
     args = message.text.split(maxsplit=1)
     if len(args) < 2:
-        await message.answer("Please provide text to generate QR code.\n\nUsage: /qrcode <text>")
+        await message.answer(
+            "Please provide text to generate QR code.\n\nUsage: /qrcode <text>"
+        )
         return
 
     text = args[1].strip()
@@ -47,7 +52,7 @@ async def qrcode_command(message: Message):
         await message.answer_photo(
             photo=buffer,
             caption=f"🔳 QR Code for: <code>{text[:50]}{'...' if len(text) > 50 else ''}</code>",
-            parse_mode="HTML"
+            parse_mode="HTML",
         )
 
         logger.info(f"QR code generated for user {message.from_user.id}")

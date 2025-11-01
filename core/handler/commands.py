@@ -4,14 +4,15 @@ import sys
 from ..logging import logger
 from ..bot import bot_instance
 
+
 def load_commands():
-    commands_dir = 'src/commands'
+    commands_dir = "src/commands"
     loaded_count = 0
     failed_count = 0
 
     for filename in os.listdir(commands_dir):
-        if filename.endswith('.py') and filename != '__init__.py':
-            module_name = f'src.commands.{filename[:-3]}'
+        if filename.endswith(".py") and filename != "__init__.py":
+            module_name = f"src.commands.{filename[:-3]}"
             try:
                 module = importlib.import_module(module_name)
                 logger.info(f"Loaded command module: {module_name}")
@@ -23,28 +24,34 @@ def load_commands():
                 logger.error(f"Unexpected error loading {module_name}: {e}")
                 failed_count += 1
 
-    logger.info(f"Command loading complete: {loaded_count} loaded, {failed_count} failed")
+    logger.info(
+        f"Command loading complete: {loaded_count} loaded, {failed_count} failed"
+    )
     return loaded_count, failed_count
+
 
 def register_commands():
     from .. import commands
+
     for cmd_name, handler in commands.items():
         bot_instance.register_command(cmd_name, handler)
         logger.info(f"Registered command: {cmd_name}")
 
+
 def reload_commands():
     """Reload all command modules and re-register them"""
-    commands_dir = 'src/commands'
+    commands_dir = "src/commands"
 
     # Clear existing command registrations
     from .. import commands
+
     commands.clear()
 
     # Reload all command modules
     reloaded_count = 0
     for filename in os.listdir(commands_dir):
-        if filename.endswith('.py') and filename != '__init__.py':
-            module_name = f'src.commands.{filename[:-3]}'
+        if filename.endswith(".py") and filename != "__init__.py":
+            module_name = f"src.commands.{filename[:-3]}"
             try:
                 if module_name in sys.modules:
                     importlib.reload(sys.modules[module_name])
@@ -60,8 +67,8 @@ def reload_commands():
 
     # Also reload the unknown command handler to ensure it's up to date
     try:
-        if 'src.commands.unknown' in sys.modules:
-            importlib.reload(sys.modules['src.commands.unknown'])
+        if "src.commands.unknown" in sys.modules:
+            importlib.reload(sys.modules["src.commands.unknown"])
             logger.debug("Reloaded unknown command handler")
     except Exception as e:
         logger.error(f"Failed to reload unknown command handler: {e}")

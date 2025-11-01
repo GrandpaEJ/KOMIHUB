@@ -4,6 +4,7 @@ from colorama import Fore, Style
 
 colorama.init(autoreset=True)
 
+
 class ColoredFormatter(logging.Formatter):
     def format(self, record):
         if record.levelno == logging.DEBUG:
@@ -23,25 +24,33 @@ class ColoredFormatter(logging.Formatter):
         record.msg = f"{color}{record.msg}{Style.RESET_ALL}"
         return super().format(record)
 
+
 # Configure logger
-logger = logging.getLogger('komihub_bot')
+logger = logging.getLogger("komihub_bot")
 logger.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler()
-console_handler.setFormatter(ColoredFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+console_handler.setFormatter(
+    ColoredFormatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+)
 logger.addHandler(console_handler)
+
 
 def log_command(command, user):
     logger.info(f"Command '{command}' executed by user {user}")
 
+
 def log_event(event, details):
     logger.info(f"Event '{event}': {details}")
+
 
 def log_error(error):
     logger.error(f"Error: {error}")
 
+
 def log_warning(warning):
     logger.warning(f"Warning: {warning}")
+
 
 def log_debug(debug):
     logger.debug(f"Debug: {debug}")
