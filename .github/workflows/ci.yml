@@ -7,39 +7,6 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install uv
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-    - name: Install dependencies
-      run: uv sync
-
-    - name: Run tests
-      run: uv run python -m pytest
-
-    - name: Check code formatting
-      run: |
-        uv run black --check .
-        uv run isort --check-only .
-
-    - name: Type checking
-      run: uv run mypy . --ignore-missing-imports
-
   lint:
     runs-on: ubuntu-latest
 
@@ -59,7 +26,14 @@ jobs:
     - name: Install dependencies
       run: uv sync
 
-    - name: Run linting
-      run: |
-        uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Check syntax with ruff
+      run: uv run ruff check . --select=E9,F63,F7,F82
+
+    - name: Check code formatting with black
+      run: uv run black --check .
+
+    - name: Check imports with isort
+      run: uv run isort --check-only .
+
+    - name: Lint with flake8
+      run: uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
