@@ -1,3 +1,4 @@
+import asyncio
 from core import Message, command, logger, get_lang
 import re
 import yt_dlp
@@ -9,25 +10,36 @@ import requests
 lang = get_lang()
 
 
-async def progress_hook(d, progress_msg, message):
-    """Progress hook for yt-dlp downloads"""
+def sync_progress_hook(d, progress_msg, message):
+    """Sync wrapper for progress hook"""
     if d["status"] == "downloading":
         try:
             percent = d.get("_percent_str", "0%").strip()
             speed = d.get("_speed_str", "N/A")
             eta = d.get("_eta_str", "N/A")
 
-            progress_text = f"🎵 Downloading audio from YouTube...\n⏳ Progress: {percent}\n🚀 Speed: {speed}\n⏰ ETA: {eta}"
-
-            # Update progress message
-            await progress_msg.edit_text(progress_text, parse_mode="HTML")
+            # Schedule the async operation in the current event loop
+            def update_progress():
+                try:
+                    progress_text = f"🎵 Downloading audio from YouTube...\n⏳ Progress: {percent}\n🚀 Speed: {speed}\n⏰ ETA: {eta}"
+                    asyncio.create_task(progress_msg.edit_text(progress_text, parse_mode="HTML"))
+                except Exception as e:
+                    logger.error(f"Progress update error: {e}")
+            
+            update_progress()
         except Exception as e:
             logger.error(f"Progress update error: {e}")
     elif d["status"] == "finished":
         try:
-            await progress_msg.edit_text(
-                "🎵 Download complete! Processing audio...", parse_mode="HTML"
-            )
+            def finish_progress():
+                try:
+                    asyncio.create_task(progress_msg.edit_text(
+                        "🎵 Download complete! Processing audio...", parse_mode="HTML"
+                    ))
+                except Exception as e:
+                    logger.error(f"Progress finish error: {e}")
+            
+            finish_progress()
         except Exception as e:
             logger.error(f"Progress finish error: {e}")
 
@@ -247,7 +259,7 @@ async def yt_music_command(message: Message):
                 "outtmpl": os.path.join(tempfile.gettempdir(), "%(title)s.%(ext)s"),
                 "quiet": True,
                 "no_warnings": True,
-                "progress_hooks": [lambda d: progress_hook(d, progress_msg, message)],
+                "progress_hooks": [lambda d: sync_progress_hook(d, progress_msg, message)],
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:

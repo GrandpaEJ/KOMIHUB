@@ -1,20 +1,22 @@
 {
   "start": {
-    "total_uses": 2,
-    "unique_users": 2,
-    "last_used": 1761675155.9219995,
+    "total_uses": 3,
+    "unique_users": 3,
+    "last_used": 1762008949.2290375,
     "users": {
       "6122160777": 1,
-      "7766886292": 1
+      "7766886292": 1,
+      "5888937785": 1
     }
   },
   "help": {
-    "total_uses": 5,
-    "unique_users": 2,
-    "last_used": 1761727275.5247693,
+    "total_uses": 7,
+    "unique_users": 3,
+    "last_used": 1762008957.8293145,
     "users": {
       "7766886292": 1,
-      "6122160777": 4
+      "6122160777": 5,
+      "5888937785": 1
     }
   },
   "reload": {
@@ -26,11 +28,11 @@
     }
   },
   "restart": {
-    "total_uses": 16,
+    "total_uses": 19,
     "unique_users": 1,
-    "last_used": 1761728883.9366302,
+    "last_used": 1762007795.9036987,
     "users": {
-      "6122160777": 16
+      "6122160777": 19
     }
   },
   "fbc": {
@@ -50,11 +52,12 @@
     }
   },
   "song": {
-    "total_uses": 7,
-    "unique_users": 1,
-    "last_used": 1761728786.196934,
+    "total_uses": 14,
+    "unique_users": 2,
+    "last_used": 1762008792.018189,
     "users": {
-      "6122160777": 7
+      "6122160777": 13,
+      "5888937785": 1
     }
   },
   "unsend": {

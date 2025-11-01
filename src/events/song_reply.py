@@ -1,3 +1,4 @@
+import asyncio
 from core import logger, get_lang, FSInputFile, Message
 import yt_dlp
 import os
@@ -6,26 +7,37 @@ import tempfile
 lang = get_lang()
 
 
-async def progress_hook(d, progress_msg, message):
-    """Progress hook for yt-dlp downloads"""
+def sync_progress_hook(d, progress_msg, message):
+    """Sync wrapper for progress hook"""
     if d["status"] == "downloading":
         try:
             percent = d.get("_percent_str", "0%").strip()
             speed = d.get("_speed_str", "N/A")
             eta = d.get("_eta_str", "N/A")
 
-            progress_text = f"🎵 Downloading: <b>{progress_msg.text.split('Downloading:')[1].split('\\n')[0].strip()}</b>\n⏳ Progress: {percent}\n🚀 Speed: {speed}\n⏰ ETA: {eta}"
-
-            # Update progress message
-            await progress_msg.edit_text(progress_text, parse_mode="HTML")
+            # Schedule the async operation in the current event loop
+            def update_progress():
+                try:
+                    progress_text = f"🎵 Downloading: <b>{progress_msg.text.split('Downloading:')[1].split('\\n')[0].strip()}</b>\n⏳ Progress: {percent}\n🚀 Speed: {speed}\n⏰ ETA: {eta}"
+                    asyncio.create_task(progress_msg.edit_text(progress_text, parse_mode="HTML"))
+                except Exception as e:
+                    logger.error(f"Progress update error: {e}")
+            
+            update_progress()
         except Exception as e:
             logger.error(f"Progress update error: {e}")
     elif d["status"] == "finished":
         try:
-            await progress_msg.edit_text(
-                f"🎵 Download complete! Processing audio...\n{progress_msg.text.split('\\n')[0]}",
-                parse_mode="HTML",
-            )
+            def finish_progress():
+                try:
+                    asyncio.create_task(progress_msg.edit_text(
+                        f"🎵 Download complete! Processing audio...\n{progress_msg.text.split('\\n')[0]}",
+                        parse_mode="HTML",
+                    ))
+                except Exception as e:
+                    logger.error(f"Progress finish error: {e}")
+            
+            finish_progress()
         except Exception as e:
             logger.error(f"Progress finish error: {e}")
 
@@ -107,7 +119,7 @@ async def handle_song_reply(message: Message):
             "outtmpl": os.path.join(tempfile.gettempdir(), "%(title)s.%(ext)s"),
             "quiet": True,
             "no_warnings": True,
-            "progress_hooks": [lambda d: progress_hook(d, progress_msg, message)],
+            "progress_hooks": [lambda d: sync_progress_hook(d, progress_msg, message)],
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -167,6 +179,12 @@ async def handle_song_reply(message: Message):
                     yt_music_command.cache.pop(message.from_user.id, None)
                 if hasattr(song_command, "cache"):
                     song_command.cache.pop(message.from_user.id, None)
+                
+                # Auto-unsend the search results message
+                try:
+                    await message.reply_to_message.delete()
+                except Exception as e:
+                    logger.error(f"Failed to auto-unsend search results: {e}")
 
             else:
                 await message.answer("❌ Failed to find downloaded audio file.")
